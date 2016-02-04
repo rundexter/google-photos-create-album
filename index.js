@@ -1,6 +1,7 @@
 var _ = require('lodash')
     , request = require('request')
-    //, xml2js = require('xml2js')
+    , xml2js = require('xml2js')
+    , q = require('q')
 ;
 module.exports = {
     /**
@@ -13,11 +14,28 @@ module.exports = {
         var album = step.input('album').first().toLowerCase()
             , summary = step.input('summary').first() || ''
             , isPublic = step.input('public').first() || false
-            , strPublic = isPublic ? 'public' : 'private'
             , allowComments = step.input('comments_allowed').first() || false
-            , strAllowComments = allowComments ? 'true' : 'false'
             , token = dexter.provider('google').credentials('access_token')
             , user = 'default'
+            , self = this
+        ;
+        this.albumExists(album, user, token)
+            .then(function(exists) {
+                if(exists) {
+                    self.log('Album already exists');
+                    return q();
+                }
+                return self.createAlbum(album, summary, user, isPublic, allowComments, token);
+            })
+            .then(function() {
+                self.complete({});
+            })
+            .fail(self.fail)
+        ;
+    }
+    , createAlbum: function(album, summary, user, isPublic, allowComments, token) {
+        var strPublic = isPublic ? 'public' : 'private'
+            , strAllowComments = allowComments ? 'true' : 'false'
             , headers = {
                 'GData-Version': 2
                 , 'Authorization': 'Bearer ' + token
@@ -40,7 +58,7 @@ module.exports = {
                 '    term="http://schemas.google.com/photos/2007#album"></category>',
                 '</entry>'
             ].join("")
-            , self = this
+            , deferred = q.defer()
         ;
         request
             .post(url, {
@@ -49,11 +67,55 @@ module.exports = {
                 , secure: false
             })
             .on('error', function(err) {
-                self.fail(err);
+                deferred.reject(err);
             })
             .on('response', function(response, body) {
-                self.complete({});
+                deferred.resolve('');
             })
+        ;
+        return deferred.promise;
+    }
+    , albumExists: function(album, user, token) {
+        var self = this;
+        return q.npost(self, 'albums', [token, user])
+            .then(function(data) {
+                var found = false;
+                self.log("Looking for " + album + "' in albums", {
+                    albums: data.feed.entry
+                });
+                _.each(data.feed.entry, function(entry) {
+                    var title = entry.title[0].toLowerCase();
+                    if(title === album) {
+                        found = true;
+                        return false;
+                    }
+                });
+                return q(found);
+            })
+        ;
+    }
+    , albums: function(token, user, callback) {
+        var headers = {
+                'GData-Version': 2
+                , 'Authorization': 'Bearer ' + token
+                , 'Content-Length': 0
+            }
+            , url = "https://picasaweb.google.com/data/feed/api/user/" + user
+            , self = this
+        ;
+        request
+            .get(url, {
+                headers: headers
+            }, function(err, resp, body) {
+                if(err) {
+                    return callback(err, null);
+                }
+                if(resp.statusCode !== 200) {
+                    self.log('Invalid response', { response: resp, body: body });
+                    return callback(new Error('Bad response, status code ' + resp.statusCode));
+                }
+                xml2js.parseString(body, callback);
+            });
         ;
     }
 };
