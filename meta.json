@@ -1,26 +1,24 @@
-/*
- * Metadata describing the module operation
- */
 {
-    //Required. Inputs the module expects.
     "inputs": [
-        //e.g.
-        /*
         {
-            "id": "from",
-            "title":"From"
+            "id": "album",
+            "title": "Albumn"
+        },
+        {
+            "id": "summary",
+            "title":"Summary"
+        },
+        {
+            "id": "public",
+            "title": "Public?"
+        },
+        {
+            "id": "comments_allowed",
+            "title": "Comments?"
         }
-        */
     ],
-    //Required. Outputs the module emits.
     "outputs": [
-      //e.g.
-      /*
-        {
-            "id": "from",
-            "title":"From"
-        }
-      */
     ],
+    "icon": "google",
     "title": "Google Photos: Create Album" /* Required.A display name for the module */
 }

@@ -1,12 +1,13 @@
 {
-    "name": "google-photos-create-album",
-    "version": "0.0.1",
-    "description": "",
-    "main": "index.js",
-    "author": "Justin Fargione",
-    "license": "ISC",
-    "private": true,
-    "dependencies": {
-        "lodash": "^3.9.3"
-    }
+  "name": "google-photos-create-album",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "author": "Justin Fargione",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "lodash": "^3.9.3",
+    "request": "^2.69.0"
+  }
 }
