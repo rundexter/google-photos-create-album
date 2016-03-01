@@ -1,10 +1,10 @@
 {
   "name": "google-photos-create-album",
   "version": "0.0.1",
-  "description": "",
+  "description": "Create an album in Google Photos if it doesn't exist",
   "main": "index.js",
-  "author": "Justin Fargione",
-  "license": "ISC",
+  "author": "Run Dexter, Inc.",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "lodash": "^3.9.3",
